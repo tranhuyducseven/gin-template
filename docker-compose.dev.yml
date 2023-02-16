@@ -1,0 +1,23 @@
+version: "3"
+services:
+  postgres:
+    image: 'postgres:15' 
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/initdb:/sampledb/initdb
+    env_file: .docker.env
+
+  adminer:
+    image: adminer
+    links:
+      - postgres:postgres
+    ports:
+      - 8080:8080
+
+volumes:
+  pg_data:
+
+

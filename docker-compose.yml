@@ -1,0 +1,32 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:12-alpine 
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db/initdb:/sampledb/initdb
+    env_file: .docker.env
+
+  adminer:
+    image: adminer
+    links:
+      - postgres:postgres
+    ports:
+      - 8080:8080
+  app:
+    depends_on:
+      - postgres
+    build: .
+    container_name: template-server
+    ports:
+      - '8000:8000'
+    environment:
+    - DB_SOURCE=postgresql://root:secret@postgres:5432/sampledb?sslmode=disable
+
+volumes:
+  pg_data:
+
+
