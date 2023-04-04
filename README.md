@@ -1,10 +1,41 @@
 # Gin template
 
+## Prerequisite: *docker, docker-compose, [migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)*
+
+- If you don't have ***migrate***, please run this following command:
+  - Download:
+  
+    ```bash
+    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
+    ```
+
+  - Using `ls` to check if the `migrate` binary have existed?
+  - Alias:
+  
+    ```bash
+    sudo ln -sf [your-directory-which-includes-migrate-binary-file]/migrate /usr/bin/migrate
+    ```
+
+  - Run this command to check migrate:
+  ```migrate```  
+- If you don't have ***sqlc***, please run this following command:
+
+    ```bash
+    go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+    ```
+
+- If you don't have ***mockgen***, please run this following command:
+
+    ```bash
+    sudo apt install mockgen
+    ```
+
 ## Before start the project
+
 - Name of module is placed in `go.mod`, you need rename it.
 - Fix all imports in all files with "re-named" module
 - This project use **viper** for loading configs, make sure that you checked them
-  - `app.env` 
+  - `app.env`
   - `.docker.env`
   - `docker-compose.dev`
   - `docker-compose`
@@ -42,35 +73,47 @@
  ┗ 📜 app.env              
 ```
 
-
 ## How to start this project?
 
-1. Install dependencies
-```bash
-go get -u -v  all
-```
+- Install dependencies
 
-2. Init postgres
-```bash
-make bootstrap
-```
-3. Init schema
-```bash
-make migrateup
-```
-4.  Create sample data data (optional)
+  ```bash
+  go get -u -v  all
+  ```
+
+- Create sample data data (optional)
 
 ```bash
 make seed
 ```
-5. Start the app:
+
+- Start the app (For the first running):
+
 ```bash
-make server
+make bootstrap-postgres
 ```
 
-6. Access [adminer](http://localhost:8080/) and login follows info in **.docker.env** file.
+or:
 
-## Some helpful commands:
+```bash
+make bootstrap-sqlite3
+```
+
+- Run for the next:
+
+```bash
+make run-postgres
+```
+
+or:
+
+```bash
+make run-sqlite3
+```
+
+- Access [adminer](http://localhost:8080/) and login follows info in **.docker.env** file.
+
+## Some helpful commands
 
 - Drop all db:
   `make migratedown`
@@ -83,22 +126,22 @@ make server
 make sqlc && make mock
 ```
 
-# Simple rules when using Git.
+## Simple rules when using Git
 
 1. For development, you have to create a new branch like this: `feat/your_feature`. Eg: `feat/customer`
 2. Before merging your branch to `main`,
 
-- Ensure that your ticket passes the definition of done
-- Check that you’ve added the necessary tests
-- Finally, create pull requests. ([ref here](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request))
+   - Ensure that your ticket passes the definition of done
+   - Check that you’ve added the necessary tests
+   - Finally, create pull requests. ([ref here](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request))
 
 3. Commitment (`git commit -m`) follows this format: `feature|fix(branch_name): your message`.
 
-- Eg: `feature(customer): new function`, `fix(customer): fix leak memory`,...
+   - Eg: `feature(customer): new function`, `fix(customer): fix leak memory`,...
 
 4. Before coding, you have to make sure that the source code is the latest version, use `git checkout main && git pull main`.
 
-# Merge request locally
+## Merge request locally
 
 1. `git fetch origin`
 

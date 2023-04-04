@@ -24,7 +24,7 @@ services:
     ports:
       - '8000:8000'
     environment:
-    - DB_SOURCE=postgresql://root:secret@postgres:5432/sampledb?sslmode=disable
+    - DB_SOURCE=postgresql://root:secret@localhost:5432/sampledb?sslmode=disable
 
 volumes:
   pg_data:

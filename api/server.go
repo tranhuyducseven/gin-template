@@ -44,8 +44,8 @@ func (server *Server) setupRouter() {
 	router.Use(CORSMiddleware())
 	server.setupGinCustomerValidation()
 
+	router.POST("/api/customer/create", server.createCustomer)
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-	authRoutes.POST("/api/customer/create", server.createCustomer)
 	authRoutes.POST("/api/customer/login", server.loginCustomer)
 	authRoutes.GET("/api/customer/:username", server.getCustomer)
 	authRoutes.GET("/api/customers", server.listCustomers)
