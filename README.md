@@ -1,45 +1,31 @@
 # Gin template
 
-## Prerequisite: *docker, docker-compose, [migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)*
+## Prerequisite:
 
-- If you don't have ***migrate***, please run this following command:
-  - Download:
-  
-    ```bash
-    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
-    ```
-
-  - Using `ls` to check if the `migrate` binary have existed?
-  - Alias:
-  
-    ```bash
-    sudo ln -sf [your-directory-which-includes-migrate-binary-file]/migrate /usr/bin/migrate
-    ```
-
-  - Run this command to check migrate:
-  ```migrate```  
-- If you don't have ***sqlc***, please run this following command:
-
-    ```bash
-    go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
-    ```
-
-- If you don't have ***mockgen***, please run this following command:
-
-    ```bash
-    sudo apt install mockgen
-    ```
+1. Docker
+2. Docker-compose
+3. Migrate
+   - Ubuntu: [Github](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
+   - MacOS: [Homebrew](https://formulae.brew.sh/formula/golang-migrate)
+4. Mockgen: [Github](https://github.com/uber-go/mock)
+5. Sqlc: `go install github.com/kyleconroy/sqlc/cmd/sqlc@latest`
 
 ## Before start the project
 
 - Name of module is placed in `go.mod`, you need rename it.
 - Fix all imports in all files with "re-named" module
-- This project use **viper** for loading configs, make sure that you checked them
-  - `app.env`
-  - `.docker.env`
-  - `docker-compose.dev`
-  - `docker-compose`
-  - `Makefile`
+- This project use [godotenv](https://github.com/joho/godotenv) for loading configs. The priority of loading is:
+  - .env.development.local, .env.test.local, .env.production.local
+  - .env.local
+  - .env.development, .env.test, .env.production
+  - .env
+  - Default environment is `.env.development`. If you want to run production mode you must create `.env.production` file then run `make run-prod`
+  - Don't forget to check these files to make sure the valid modules and configs:
+    - `app.env`
+    - `.docker.env`
+    - `docker-compose.dev`
+    - `docker-compose`
+    - `Makefile`
 - It uses **sqlc** tool for generating **.go** files at `db/sqlc` directory. It makes easier for interacting with database layer.
   > Just add sql scripts in `db/query` directory, each file corresponding one entity.
 - It uses **paseto** for token generation, you can add another token generator that you want, it has an interface named **Maker** at `token/maker.go`
@@ -47,9 +33,10 @@
 ## Project structure
 
 ```null
+📦 docs                     # Documents 
 📦 api                      # Business layer
  ┣ 📜 server.go             # Init routing
- ┗ 📜 [sample].go         # Sample API   
+ ┗ 📜 [sample].go         # Sample API
  ┣ 📜 middleware.go         # Middleware
  ┗ 📜 validator.go          # Validator for Gin
  ┣ 📜 main_test.go          # Test all apis
@@ -57,100 +44,41 @@
  ┣ 📂 initdb                  # Init sql (optional)
  ┃ ┣ 📂 func_proc             # function and procedure for database
  ┃ ┣ 📂 trigger               # trigger for database
- ┃ ┗ 📜 [sample].sql             
+ ┃ ┗ 📜 [sample].sql
  ┣ 📂 migration              # Contains migration files
- ┣ 📂 mock                   # Mock db (auto generating) 
+ ┣ 📂 mock                   # Mock db (auto generating)
  ┣ 📂 query                  # Define entities here
- ┃ ┗ 📜 [sample].sql               
+ ┃ ┗ 📜 [sample].sql
  ┣ 📂 sqlc                   # Database caller (auto-generating)
- ┃ ┣ 📜 db.go, models.go, querier.go  # (auto-generating)          
- ┃ ┣ 📜 [sample].go                   # (auto-generating)               
+ ┃ ┣ 📜 db.go, models.go, querier.go  # (auto-generating)
+ ┃ ┣ 📜 [sample].go                   # (auto-generating)
  ┃ ┗ 📜 store.go             # Database storage (tx logics)
  ┣ 📂 token                  # token
- ┣ 📂 utils                  
+ ┣ 📂 utils
  ┣ 📜 main.go                # Init sever and db, start here
- ┣ 📜 .docker.env            
- ┗ 📜 app.env              
+ ┣ 📜 .docker.env
+ ┣ 📜 .env
+ ┗ 📜 .env.development
+
 ```
 
 ## How to start this project?
 
-- Install dependencies
+1. Install dependencies `make install`
+2. Run for the first time (docker-compose.dev.yml): `make bootstrap`
+3. Run `make server` to start server
+4. Or run `make run-prod` to start server in production mode
 
-  ```bash
-  go get -u -v  all
-  ```
 
-- Create sample data data (optional)
-
-```bash
-make seed
-```
-
-- Start the app (For the first running):
-
-```bash
-make bootstrap-postgres
-```
-
-or:
-
-```bash
-make bootstrap-sqlite3
-```
-
-- Run for the next:
-
-```bash
-make run-postgres
-```
-
-or:
-
-```bash
-make run-sqlite3
-```
-
+## Accessing database
 - Access [adminer](http://localhost:8080/) and login follows info in **.docker.env** file.
+![Alt text](docs/connect-adminer.png)
 
-## Some helpful commands
-
-- Drop all db:
-  `make migratedown`
-- Sql command line
-  `make psql`
+## Other commands
+- Migration up: `make migrateup` (auto run when start server)
+- Drop all db: `make migratedown`
+- Sql command line: `make psql`
 
 ## After added new entities, you must run these commands for re-generating **models**
+`make sqlc` and  `make mock`
 
-```bash
-make sqlc && make mock
-```
-
-## Simple rules when using Git
-
-1. For development, you have to create a new branch like this: `feat/your_feature`. Eg: `feat/customer`
-2. Before merging your branch to `main`,
-
-   - Ensure that your ticket passes the definition of done
-   - Check that you’ve added the necessary tests
-   - Finally, create pull requests. ([ref here](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request))
-
-3. Commitment (`git commit -m`) follows this format: `feature|fix(branch_name): your message`.
-
-   - Eg: `feature(customer): new function`, `fix(customer): fix leak memory`,...
-
-4. Before coding, you have to make sure that the source code is the latest version, use `git checkout main && git pull main`.
-
-## Merge request locally
-
-1. `git fetch origin`
-
-2. `git checkout -b origin/feature feature`
-
-3. `git fetch origin`
-
-4. `git checkout origin/main`
-
-5. `git merge --no-ff feature`
-
-6. `git push origin main`

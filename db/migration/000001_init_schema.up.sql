@@ -1,4 +1,3 @@
--- Strong entities
 CREATE TABLE IF NOT EXISTS "customer" (
     "id" bigserial primary key, 
     "username" varchar NOT NULL,

@@ -7,11 +7,7 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./db/initdb:/sampledb/initdb
-    environment:
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=secret
-      - POSTGRES_DB=sampledb
+    env_file: .docker.env
 
   adminer:
     image: adminer
